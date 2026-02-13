@@ -1,0 +1,348 @@
+﻿:root {
+  --bg-top: #f4f6f9;
+  --bg-bottom: #e7eefc;
+  --card: #ffffff;
+  --text-main: #1e2430;
+  --text-sub: #677084;
+  --line: #d7ddeb;
+  --income: #0f9d58;
+  --expense: #d93025;
+  --balance: #1b63d8;
+  --accent: #2f5ee5;
+  --shadow: 0 22px 44px rgba(27, 57, 129, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 10% 20%, rgba(47, 94, 229, 0.15) 0, rgba(47, 94, 229, 0) 32%),
+    radial-gradient(circle at 100% 0%, rgba(26, 188, 156, 0.16) 0, rgba(26, 188, 156, 0) 28%),
+    linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app-shell {
+  width: min(980px, calc(100% - 2rem));
+  margin: 2.5rem auto;
+  animation: fade-in 0.55s ease-out;
+}
+
+.app-card {
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: clamp(1.9rem, 3vw, 2.4rem);
+}
+
+.app-kicker {
+  margin: 0;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.77rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.app-subtitle {
+  margin-top: 0.55rem;
+  margin-bottom: 0;
+  color: var(--text-sub);
+}
+
+.summary-grid {
+  margin-top: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.summary-item {
+  border-radius: 16px;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  background: #fff;
+  animation: rise 0.45s ease-out;
+}
+
+.summary-label {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-sub);
+}
+
+.summary-value {
+  margin: 0.45rem 0 0;
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  font-weight: 700;
+}
+
+.summary-item.income .summary-value {
+  color: var(--income);
+}
+
+.summary-item.expense .summary-value {
+  color: var(--expense);
+}
+
+.summary-item.balance .summary-value {
+  color: var(--balance);
+}
+
+.panel {
+  margin-top: 1rem;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 1rem;
+}
+
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.85rem;
+}
+
+.panel-heading h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.panel-heading p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-sub);
+}
+
+.type-toggle {
+  display: inline-flex;
+  gap: 0.55rem;
+  margin-bottom: 0.95rem;
+}
+
+.type-toggle label {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.type-toggle input {
+  margin: 0;
+}
+
+.type-toggle .active.income {
+  border-color: rgba(15, 157, 88, 0.35);
+  background: rgba(15, 157, 88, 0.12);
+}
+
+.type-toggle .active.expense {
+  border-color: rgba(217, 48, 37, 0.35);
+  background: rgba(217, 48, 37, 0.11);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 170px 1fr 170px;
+  gap: 0.75rem;
+}
+
+.form-grid label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.86rem;
+  color: var(--text-sub);
+}
+
+input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 0.62rem 0.75rem;
+  font: inherit;
+  color: var(--text-main);
+  background: #fff;
+}
+
+input:focus-visible {
+  outline: 2px solid rgba(47, 94, 229, 0.38);
+  outline-offset: 1px;
+}
+
+.primary-btn,
+.delete-btn {
+  border: 0;
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.primary-btn:hover,
+.delete-btn:hover {
+  transform: translateY(-1px);
+}
+
+.primary-btn {
+  margin-top: 0.95rem;
+  padding: 0.68rem 1rem;
+  color: #fff;
+  background: linear-gradient(135deg, #2757de, #5884ff);
+}
+
+.transaction-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.transaction-row {
+  display: grid;
+  grid-template-columns: 135px 1fr 140px 68px;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.78rem 0;
+  border-top: 1px solid #edf0f7;
+  animation: rise 0.4s ease-out;
+}
+
+.tx-date,
+.tx-content {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tx-content {
+  color: #2f3647;
+}
+
+.tx-amount {
+  justify-self: end;
+  font-weight: 700;
+}
+
+.tx-amount.income {
+  color: var(--income);
+}
+
+.tx-amount.expense {
+  color: var(--expense);
+}
+
+.delete-btn {
+  justify-self: end;
+  padding: 0.35rem 0.65rem;
+  color: #8d2d2d;
+  background: #fdeaea;
+}
+
+.empty-state {
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  padding: 1rem;
+  color: var(--text-sub);
+  font-size: 0.92rem;
+  text-align: center;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .transaction-row {
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas:
+      "date amount delete"
+      "content content content";
+  }
+
+  .tx-date {
+    grid-area: date;
+  }
+
+  .tx-content {
+    grid-area: content;
+    white-space: normal;
+  }
+
+  .tx-amount {
+    grid-area: amount;
+  }
+
+  .delete-btn {
+    grid-area: delete;
+  }
+}
+
+@media (max-width: 540px) {
+  .app-shell {
+    width: calc(100% - 1rem);
+    margin: 1rem auto;
+  }
+
+  .app-card {
+    padding: 1rem;
+    border-radius: 18px;
+  }
+
+  .type-toggle {
+    width: 100%;
+  }
+
+  .type-toggle label {
+    flex: 1;
+    justify-content: center;
+  }
+}
