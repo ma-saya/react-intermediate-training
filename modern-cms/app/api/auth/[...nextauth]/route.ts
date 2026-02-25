@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: "繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ",
+      name: "メールアドレス",
       credentials: {
         email: { label: "Email", type: "email", placeholder: "admin@test.com" },
         password: {
