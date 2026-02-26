@@ -3,32 +3,54 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { writeFile, mkdir } from "fs/promises";
+import { join } from "path";
 
 export default async function NewPostPage() {
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.email) redirect("/api/auth/signin");
 
-  const currentUser = await prisma.user.findUnique({
-    where: { email: session.user.email },
-  });
-
   async function createPost(formData: FormData) {
     "use server";
 
+    if (!session || !session.user?.email) return;
+
     const title = formData.get("title") as string;
     const content = formData.get("content") as string;
+    const file = formData.get("thumbnail") as File | null;
 
-    if (!title || !content || !currentUser) return;
+    if (!title || !content) return;
+
+    const currentUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+    if (!currentUser) return;
+    let thumbnailUrl = null;
+
+    if (file && file.size > 0) {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const uploadDir = join(process.cwd(), "public", "uploads");
+      await mkdir(uploadDir, { recursive: true });
+      const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+      const filePath = join(uploadDir, filename);
+      await writeFile(filePath, buffer);
+      thumbnailUrl = `/uploads/${filename}`;
+    }
+
+    if (!currentUser) {
+      return;
+    }
 
     await prisma.post.create({
       data: {
         title,
         content,
+        thumbnailUrl,
         authorId: currentUser.id,
         published: true,
       },
     });
-    redirect("/admin");
+    redirect("/admin/posts");
   }
 
   return (
@@ -42,16 +64,28 @@ export default async function NewPostPage() {
         </div>
         <form action={createPost} className="space-y-6">
           <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            タイトル
-          </label>
-          <input
-          type="text"
-          name="title"
-            required
-          className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none"
-            placeholder="Next.jsで本格CMSを作ってみた"
-          />
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              タイトル
+            </label>
+            <input
+              type="text"
+              name="title"
+              required
+              className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none"
+              placeholder="Next.jsで本格CMSを作ってみた"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              サムネイル画像
+            </label>
+            <input
+              type="file"
+              name="thumbnail"
+              accept="image/*"
+              className="w-full border border-gray-300 rounded-md p-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -74,5 +108,5 @@ export default async function NewPostPage() {
         </form>
       </div>
     </div>
-  )
+  );
 }

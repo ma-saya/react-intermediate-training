@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import Link from "next/link";
 
 export default async function PostsPage({
@@ -11,6 +12,8 @@ export default async function PostsPage({
 }) {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/api/auth/signin");
+
+  const userRole = (session.user as any).role;
 
   const params = await searchParams;
   const currentPage = Number(params.page) || 1;
@@ -38,6 +41,22 @@ export default async function PostsPage({
 
   const totalPosts = await prisma.post.count({ where: whereCondition });
   const totalPages = Math.ceil(totalPosts / perPage);
+
+  async function deletePost(formData: FormData) {
+    "use server";
+
+    const postId = formData.get("postId") as string;
+
+    const currentSession = await getServerSession(authOptions);
+    if ((currentSession?.user as any).role !== "ADMIN") {
+      throw new Error("権限がありません");
+    }
+
+    await prisma.post.delete({
+      where: { id: postId },
+    });
+    revalidatePath("/admin/posts");
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -95,6 +114,19 @@ export default async function PostsPage({
                     key={post.id}
                     className="border-b border-gray-100 hover:bg-gray-50"
                   >
+                    <td className="p-3">
+                      {post.thumbnailUrl ? (
+                        <img
+                          src={post.thumbnailUrl}
+                          alt="サムネイル"
+                          className="w-16 h-16 object-cover rounded-md border"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 bg-gray-200 rounded-md flex items-center justify-center text-xs text-gray-500">
+                          No Image
+                        </div>
+                      )}
+                    </td>
                     <td className="p-3 font-medium">{post.title}</td>
                     <td className="p-3 text-sm text-gray-600">
                       {post.author.name}
@@ -103,9 +135,19 @@ export default async function PostsPage({
                       {new Date(post.createdAt).toLocaleDateString()}
                     </td>
                     <td className="p-3">
-                      <button className="text-sm text-red-500 hover:underline">
-                        削除
-                      </button>
+                      {userRole === "ADMIN" ? (
+                        <form action={deletePost}>
+                          <input type="hidden" name="postId" value={post.id} />
+                          <button
+                            type="submit"
+                            className="text-sm text-red-500 hover:underline"
+                          >
+                            削除
+                          </button>
+                        </form>
+                      ) : (
+                        <span className="text-sm text-gray-400">権限なし</span>
+                      )}
                     </td>
                   </tr>
                 ))
